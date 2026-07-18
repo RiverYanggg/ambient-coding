@@ -53,15 +53,53 @@ fi
 
 mkdir -p "$background_dir" "$bin_dir" "$(dirname "$config_file")"
 
+migrate_legacy_category() {
+    local namespace="$1" category="$2" legacy_dir target_dir image relative destination
+    legacy_dir="$background_dir/$category"
+    target_dir="$background_dir/$namespace/$category"
+    [[ -d "$legacy_dir" ]] || return 0
+    while IFS= read -r image; do
+        relative="${image#"$legacy_dir"/}"
+        destination="$target_dir/$relative"
+        if [[ ! -f "$destination" ]]; then
+            mkdir -p "$(dirname "$destination")"
+            install -m 644 "$image" "$destination"
+        fi
+    done < <(find "$legacy_dir" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print)
+}
+
+for category in morning afternoon evening; do
+    migrate_legacy_category time "$category"
+done
+for category in clear cloudy rain snow storm; do
+    migrate_legacy_category weather "$category"
+done
+for category in calm focus energy tired happy; do
+    migrate_legacy_category mood "$category"
+done
+
 while IFS= read -r image; do
     relative="${image#"$source_backgrounds"/}"
+    [[ "$relative" == "current.jpg" ]] && continue
     destination="$background_dir/$relative"
     mkdir -p "$(dirname "$destination")"
-    install -m 644 "$image" "$destination"
+    if [[ ! -f "$destination" ]]; then
+        install -m 644 "$image" "$destination"
+    fi
 done < <(find "$source_backgrounds" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print)
 
 if [[ ! -f "$background_dir/current.jpg" ]]; then
-    install -m 644 "$background_dir/evening/mountains.jpg" "$background_dir/current.jpg"
+    default_image="$background_dir/time/evening/mountains.jpg"
+    if [[ ! -f "$default_image" ]]; then
+        default_image=""
+        while IFS= read -r candidate_image; do
+            default_image="$candidate_image"
+            break
+        done < <(find "$background_dir" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) ! -name 'current.jpg' -print | sort)
+    fi
+    if [[ -n "$default_image" ]]; then
+        install -m 644 "$default_image" "$background_dir/current.jpg"
+    fi
 fi
 
 install -m 755 "$source_script" "$bin_dir/ghostty-time-background"

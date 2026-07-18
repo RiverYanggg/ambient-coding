@@ -109,8 +109,25 @@ Keep these modes stable:
 
 - `time`: morning, afternoon, evening;
 - `weather`: auto, clear, cloudy, rain, snow, storm;
-- `random`: all local image directories, without immediate repetition;
+- `random`: the managed `time`, `weather`, `mood`, and `random` image
+  namespaces, without immediate repetition;
 - `mood`: calm, focus, energy, tired, happy, plus documented user additions.
+
+Use this background layout for new assets:
+
+```text
+backgrounds/
+├── current.jpg
+├── time/{morning,afternoon,evening}/
+├── weather/{clear,cloudy,rain,snow,storm}/
+├── mood/{calm,focus,energy,tired,happy}/
+└── random/
+```
+
+`current.jpg` is a generated runtime copy used by Ghostty. Do not treat it as a
+source asset. The CLI may keep read-only compatibility with older flat
+directories such as `backgrounds/focus/`, but new work must use the namespaced
+layout and update source records with the new paths.
 
 Weather uses Open-Meteo for non-commercial personal use. Prefer explicit
 `GHOSTTY_LATITUDE` and `GHOSTTY_LONGITUDE` when the user does not want IP-based
@@ -120,7 +137,7 @@ For a new mood or mode:
 
 1. Map the request to an existing mode when possible.
 2. Otherwise update the CLI validation and selector/help output.
-3. Add the matching image directory and preserve image source/license records.
+3. Add the matching image directory under the correct mode namespace and preserve image source/license records.
 4. Update README and relevant documentation.
 5. Add deterministic test commands for boundaries and fallback behavior.
 6. Do not claim that adding a directory alone registers a new mode.

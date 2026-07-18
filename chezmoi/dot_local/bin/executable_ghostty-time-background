@@ -26,7 +26,7 @@ Select and apply a Ghostty background.
 Modes:
   time                  Select morning, afternoon, or evening by local time
   weather               Select by weather; auto queries Open-Meteo
-  random                Select a random image from the full image pool
+  random                Select a random image from the managed image pool
   mood                  Select by calm, focus, energy, tired, or happy
 
 Options:
@@ -119,6 +119,24 @@ if [[ -n "$requested_weather" ]]; then
     printf '%s\n' "$requested_weather" > "$saved_weather"
 fi
 
+mode_namespace() {
+    case "$1" in
+        time) printf 'time' ;;
+        weather) printf 'weather' ;;
+        mood) printf 'mood' ;;
+        *) return 1 ;;
+    esac
+}
+
+collect_candidates_from() {
+    local directory="$1" image
+    [[ -d "$directory" ]] || return 0
+    while IFS= read -r image; do
+        [[ "$image" == "$current_image" ]] && continue
+        candidates+=("$image")
+    done < <(find "$directory" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print 2>/dev/null | sort)
+}
+
 select_time_slot() {
     local now hour
     if [[ -n "$requested_time" ]]; then
@@ -205,16 +223,25 @@ case "$mode" in
     random) selection_key="all"; selection_reason="random" ;;
 esac
 
-if [[ "$mode" == "random" ]]; then
-    search_dir="$background_dir"
-else
-    search_dir="$background_dir/$selection_key"
-fi
-
 candidates=()
-while IFS= read -r image; do
-    [[ "$image" == "$current_image" ]] || candidates+=("$image")
-done < <(find "$search_dir" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print 2>/dev/null | sort)
+if [[ "$mode" == "random" ]]; then
+    search_dir="$background_dir/{time,weather,mood,random}"
+    for namespace in time weather mood random; do
+        collect_candidates_from "$background_dir/$namespace"
+    done
+    if [[ ${#candidates[@]} -eq 0 ]]; then
+        search_dir="$background_dir"
+        collect_candidates_from "$background_dir"
+    fi
+else
+    namespace="$(mode_namespace "$mode")"
+    search_dir="$background_dir/$namespace/$selection_key"
+    collect_candidates_from "$search_dir"
+    if [[ ${#candidates[@]} -eq 0 && -d "$background_dir/$selection_key" ]]; then
+        search_dir="$background_dir/$selection_key"
+        collect_candidates_from "$search_dir"
+    fi
+fi
 
 if [[ ${#candidates[@]} -eq 0 && "$mode" != "random" ]]; then
     printf 'no images found for %s in %s\n' "$selection_key" "$search_dir" >&2

@@ -58,7 +58,7 @@ shortcut, use `Cmd+Shift+,` manually or grant Accessibility access to the
 terminal app running the script. Add `--no-reload` when only testing image
 selection.
 
-背景图片在 `~/.config/ghostty/backgrounds/`。Ghostty 支持 PNG 和 JPEG；建议使用 1920px 左右宽度、压缩后的图片，避免每个终端实例占用过多显存。
+背景图片在 `~/.config/ghostty/backgrounds/`。推荐结构是 `time/`、`weather/`、`mood/`、`random/` 四个素材命名空间，`current.jpg` 保留在根目录作为 Ghostty 当前实际读取的运行时图片。CLI 兼容旧版平铺目录，但新增图片应放入对应模式目录，例如 `mood/focus/` 或 `weather/rain/`。Ghostty 支持 PNG 和 JPEG；建议使用 1920px 左右宽度、压缩后的图片，避免每个终端实例占用过多显存。
 
 ### Maple Mono NF CN
 

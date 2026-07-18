@@ -9,7 +9,8 @@
 .zprofile
 .zshrc
 .config/ghostty/config
-.config/ghostty/backgrounds/*.jpg
+.config/ghostty/backgrounds/current.jpg
+.config/ghostty/backgrounds/{time,weather,mood,random}/**/*.{jpg,jpeg,png}
 .config/ripgrep/config
 .config/fastfetch/config.jsonc
 ```
@@ -54,4 +55,3 @@ chezmoi apply
 ## 跨机器调整
 
 新机器可能没有 conda、nvm 或 OpenClaw。本仓库模板只在对应文件存在时加载这些可选环境；缺失时不会让 zsh 启动失败。Homebrew prefix 使用 `brew --prefix` 或 `brew shellenv`，因此兼容 Apple Silicon 和 Intel macOS。
-

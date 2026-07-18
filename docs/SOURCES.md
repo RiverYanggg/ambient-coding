@@ -40,7 +40,7 @@
 
 ## 背景图片说明
 
-`chezmoi/dot_config/ghostty/backgrounds/` 中的三张 JPEG 是本仓库随配置保存的压缩背景资源。当前 JPEG 元数据没有保留原始摄影作者和下载 URL，因此这里不虚构具体署名；重新公开分发或替换图片时，应核对原始素材的许可，并在此表中补充准确来源。
+`chezmoi/dot_config/ghostty/backgrounds/` 中的背景资源按 `time/`、`weather/`、`mood/`、`random/` 分层保存，具体图片路径和已知来源记录在 [`backgrounds/SOURCES.md`](../chezmoi/dot_config/ghostty/backgrounds/SOURCES.md)。对没有保留原始摄影作者和下载 URL 的素材，本仓库不虚构具体署名；重新公开分发或替换图片时，应核对原始素材的许可，并补充准确来源。
 
 ## README 图片资源
 
