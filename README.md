@@ -19,9 +19,51 @@
 
 <p align="center">
   <img src="docs/images/showcase/showcase_1.png" alt="Ghostty Ambient workspace background" width="32%" />
-  <img src="docs/images/showcase/showcase_2.png" alt="Ghostty Ambient city background" width="32%" />
-  <img src="docs/images/showcase/showcase_3.png" alt="Ghostty Ambient snow background" width="32%" />
 </p>
+
+## The stack
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <a href="https://ghostty.org/">
+        <img src="assets/ghostty-logo.png" alt="Ghostty logo" width="96" />
+        <br />
+        <strong>Ghostty</strong>
+      </a>
+      <br />
+      <sub>快速、原生、可配置的 macOS 终端</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="https://yazi-rs.github.io/">
+        <img src="assets/yazi-logo.png" alt="Yazi logo" width="96" />
+        <br />
+        <strong>Yazi</strong>
+      </a>
+      <br />
+      <sub>高效的终端文件管理和目录导航</sub>
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <a href="https://github.com/junegunn/fzf">
+        <img src="assets/fzf-preview.png" alt="fzf official preview" width="100%" />
+      </a>
+      <sub>fzf：模糊搜索与文件预览</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="https://github.com/fastfetch-cli/fastfetch">
+        <img src="assets/fastfetch-example1.png" alt="fastfetch official example" width="100%" />
+      </a>
+      <sub>fastfetch：清晰的系统信息展示</sub>
+    </td>
+  </tr>
+</table>
+
+上方工具 logo 和功能图来自对应开源项目的官方资源，用于说明本项目组合的上游能力，不代表本机运行截图，也不声明为本项目原创。完整来源和许可信息见 [`docs/SOURCES.md`](docs/SOURCES.md)。
 
 ## Built for focused coding
 
