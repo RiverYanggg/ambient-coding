@@ -4,7 +4,7 @@
 
 ### 一个让你专注编码、提高效率和体验的 macOS 终端工作区
 
-基于 [Ghostty](https://ghostty.org/)、zsh 和 chezmoi 的可迁移终端配置：把常用工具、快捷操作和稳定工作流放在一起，再用 Ghostty Ambient 为长时间编码提供低干扰的视觉氛围。
+基于 [Ghostty](https://ghostty.org/)、zsh 和 chezmoi 的可迁移终端配置：把常用工具、快捷操作和稳定工作流放在一起，用 Ghostty Ambient 为长时间编码提供低干扰的视觉氛围。
 
 <p>
   <a href="https://github.com/RiverYanggg/ambient-coding">GitHub</a> ·
