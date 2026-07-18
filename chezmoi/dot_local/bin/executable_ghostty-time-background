@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+background_dir="${GHOSTTY_BACKGROUND_DIR:-$HOME/.config/ghostty/backgrounds}"
+current_image="$background_dir/current.jpg"
+state_file="${XDG_CACHE_HOME:-$HOME/.cache}/ghostty-time-background/slot"
+reload=true
+quiet=false
+requested_time=""
+
+usage() {
+    cat <<'EOF'
+Usage: ghostty-time-background [options]
+
+Select and apply a Ghostty background based on the local time.
+
+Options:
+  --time HH:MM  Simulate a local time for verification
+  --no-reload   Update the image without asking Ghostty to reload
+  --quiet       Suppress normal output
+  --show        Print the selected time slot and image
+  -h, --help    Show this help
+EOF
+}
+
+log() {
+    if [[ "$quiet" == false ]]; then
+        printf '%s\n' "$*"
+    fi
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --time)
+            [[ $# -ge 2 ]] || { printf 'missing value for --time\n' >&2; exit 2; }
+            requested_time="$2"
+            shift 2
+            ;;
+        --no-reload)
+            reload=false
+            shift
+            ;;
+        --quiet)
+            quiet=true
+            shift
+            ;;
+        --show)
+            quiet=false
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            printf 'unknown option: %s\n' "$1" >&2
+            usage >&2
+            exit 2
+            ;;
+    esac
+done
+
+if [[ -n "$requested_time" ]]; then
+    if [[ ! "$requested_time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
+        printf 'invalid time: %s (expected HH:MM)\n' "$requested_time" >&2
+        exit 2
+    fi
+    now="$requested_time"
+else
+    now="$(date +%H:%M)"
+fi
+
+hour="${now%%:*}"
+hour=$((10#$hour))
+
+if (( hour < 12 )); then
+    slot="morning"
+    image_name="dark-forest.jpg"
+elif (( hour < 18 )); then
+    slot="afternoon"
+    image_name="night-city.jpg"
+else
+    slot="evening"
+    image_name="night-mountains.jpg"
+fi
+
+source_image="$background_dir/$image_name"
+if [[ ! -f "$source_image" ]]; then
+    printf 'background image not found: %s\n' "$source_image" >&2
+    exit 1
+fi
+
+mkdir -p "$background_dir" "$(dirname "$state_file")"
+if [[ ! -f "$current_image" ]] || ! cmp -s "$source_image" "$current_image"; then
+    cp "$source_image" "$current_image"
+fi
+printf '%s\n' "$slot" > "$state_file"
+
+log "Ghostty background: $slot ($now) -> $image_name"
+
+if [[ "$reload" == true ]]; then
+    if command -v osascript >/dev/null 2>&1; then
+        if ! osascript \
+            -e 'tell application "System Events" to tell process "Ghostty" to keystroke "," using {command down, shift down}' \
+            >/dev/null 2>&1; then
+            log "Ghostty reload was not triggered; press Cmd+Shift+, manually."
+        fi
+    fi
+fi

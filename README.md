@@ -17,6 +17,30 @@
   <img src="chezmoi/dot_config/ghostty/backgrounds/night-mountains.jpg" alt="Night mountains Ghostty background" width="31%">
 </p>
 
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <a href="https://github.com/junegunn/fzf">
+        <img src="assets/fzf-preview.png" alt="Official fzf preview" width="100%">
+      </a>
+      <sub>fzf 官方预览图：模糊搜索与文件预览</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="https://github.com/fastfetch-cli/fastfetch">
+        <img src="assets/fastfetch-example1.png" alt="Official fastfetch example" width="100%">
+      </a>
+      <sub>fastfetch 官方示例：系统信息展示</sub>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="assets/ghostty-logo.png" alt="Ghostty logo" width="84">
+  <img src="assets/yazi-logo.png" alt="Yazi logo" width="84">
+</p>
+
+<p align="center"><sub>上方功能图和 logo 来自对应项目官方资源；它们用于说明上游工具能力，不代表本机运行截图。来源见 <a href="docs/SOURCES.md">docs/SOURCES.md</a>。</sub></p>
+
 这是一套面向 macOS、Ghostty 和 zsh 的可迁移终端配置。目标是把常用工具、快捷操作和个人使用习惯记录清楚，并让新的机器可以通过 Homebrew + chezmoi 复现。
 
 ## 当前方案

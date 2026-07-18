@@ -42,3 +42,15 @@
 
 `chezmoi/dot_config/ghostty/backgrounds/` 中的三张 JPEG 是本仓库随配置保存的压缩背景资源。当前 JPEG 元数据没有保留原始摄影作者和下载 URL，因此这里不虚构具体署名；重新公开分发或替换图片时，应核对原始素材的许可，并在此表中补充准确来源。
 
+## README 图片资源
+
+README 中的功能图不是本机截图，而是从上游项目官方 README 或仓库资源下载的展示素材：
+
+| 本地文件 | 来源 | 用途 |
+|---|---|---|
+| [`assets/fzf-preview.png`](../assets/fzf-preview.png) | [fzf 官方 README](https://github.com/junegunn/fzf#readme) · [原图](https://raw.githubusercontent.com/junegunn/i/master/fzf-preview.png) | 展示模糊搜索和预览 |
+| [`assets/fastfetch-example1.png`](../assets/fastfetch-example1.png) | [fastfetch 官方 README](https://github.com/fastfetch-cli/fastfetch#readme) · [原图](https://raw.githubusercontent.com/fastfetch-cli/fastfetch/dev/screenshots/example1.png) | 展示系统信息布局 |
+| [`assets/ghostty-logo.png`](../assets/ghostty-logo.png) | [Ghostty 官方 README](https://github.com/ghostty-org/ghostty#readme) · [原图](https://github.com/user-attachments/assets/fe853809-ba8b-400b-83ab-a9a0da25be8a) | README 品牌识别 |
+| [`assets/yazi-logo.png`](../assets/yazi-logo.png) | [Yazi 官方仓库](https://github.com/sxyazi/yazi) · [原图](https://raw.githubusercontent.com/sxyazi/yazi/main/assets/logo.png) | README 品牌识别 |
+
+这些资源的再分发应遵守各自项目仓库中的许可证和品牌使用规则；仓库保留原始项目链接，不把上游图片声明为本项目原创。

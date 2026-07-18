@@ -52,6 +52,12 @@ alias ll='lsd -l'
 alias la='lsd -la'
 alias lt='lsd --tree --depth=2'
 export PATH="$HOME/.npm-global/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Select a time-based Ghostty background when a new shell starts.
+if [[ "$TERM_PROGRAM" == "ghostty" ]] && command -v ghostty-time-background >/dev/null 2>&1; then
+    ghostty-time-background --quiet
+fi
 
 # Accept an autosuggestion with Tab; otherwise use normal zsh completion.
 function _tab_complete_or_accept_suggestion() {
@@ -76,4 +82,3 @@ function y() {
     fi
     rm -f -- "$tmp"
 }
-
