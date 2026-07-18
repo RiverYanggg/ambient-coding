@@ -14,6 +14,8 @@
 
 </div>
 
+> **仅支持 macOS**：Ghostty 当前仅支持 macOS，因此 Ghostty Ambient 无法在 Linux 或 Windows 上运行。
+
 <p align="center">
   <img src="docs/images/showcase/showcase_1.png" alt="Ghostty Ambient workspace background" width="32%" />
   <img src="docs/images/showcase/showcase_2.png" alt="Ghostty Ambient city background" width="32%" />
@@ -44,7 +46,7 @@
 
 ### Requirements
 
-- macOS
+- macOS（唯一支持的平台；Ghostty 当前仅支持 macOS）
 - [Ghostty](https://ghostty.org/) 1.2.0 或更高版本
 - Bash、zsh、curl
 - `jq`（仅自动天气模式需要）

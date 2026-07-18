@@ -2,12 +2,13 @@
 
 ## Project scope
 
-This repository packages Ghostty Ambient, a macOS-first tool that selects a local
-Ghostty background from time, weather, random, or mood context.
+This repository packages Ghostty Ambient, a macOS-only tool that selects a local
+Ghostty background from time, weather, random, or mood context. Ghostty currently
+supports macOS only; do not present Linux or Windows installation paths.
 
-When a user asks to configure or extend the project, treat the Ambient feature as
-the primary scope. The full terminal workspace in `scripts/bootstrap.sh` is
-optional and must not be installed unless the user explicitly asks for it.
+When a user asks to configure or extend the project, treat Ghostty Ambient as the
+primary product. The complete terminal workspace in `scripts/bootstrap.sh` is an
+optional bundle and must not be installed unless the user explicitly asks for it.
 
 ## Required reading
 
@@ -34,22 +35,23 @@ secret in the repository.
 
 ## Safe automation workflow
 
-1. Inspect `uname -s`, Ghostty availability, `command -v jq`,
+1. Confirm `uname -s` is `Darwin`; stop with a clear explanation on other systems.
+2. Inspect Ghostty availability, `command -v jq`,
    `command -v curl`, current Ghostty config, and `git status`.
-2. Back up or show a diff for existing user configuration before applying changes.
-3. Prefer `bash scripts/install-ambient.sh` for a normal installation. Use
+3. Back up or show a diff for existing user configuration before applying changes.
+4. Prefer `bash scripts/install-ambient.sh` for a normal installation. Use
    `--no-deps` when dependencies are managed separately.
-4. Do not run the full `scripts/bootstrap.sh` unless the user requests the
+5. Do not run the full `scripts/bootstrap.sh` unless the user requests the
    complete macOS terminal workspace.
-5. Keep user configuration changes narrow:
+6. Keep user configuration changes narrow:
    - replace only the `background-image` entry in Ghostty config;
    - add the marked idempotent hook to `~/.zshrc`;
    - install the CLI under `~/.local/bin`;
    - copy assets under `~/.config/ghostty/backgrounds/`.
-6. For existing chezmoi-managed machines, run
+7. For existing chezmoi-managed machines, run
    `chezmoi --source "$PWD/chezmoi" diff` before `apply`. Do not use
    `chezmoi apply --force` or overwrite unrelated dotfiles.
-7. If macOS blocks automatic Ghostty reload, explain the Accessibility permission
+8. If macOS blocks automatic Ghostty reload, explain the Accessibility permission
    and keep the manual `Cmd+Shift+,` fallback.
 
 ## Mode configuration rules
@@ -90,6 +92,10 @@ When the user describes a new context such as "deep work on rainy mornings":
 - otherwise create a small, explicit mode or mood directory;
 - do not add an API dependency when a local rule is sufficient;
 - explain any new permission, network, or API-key requirement.
+
+Do not claim that adding a directory alone creates a new mode. The current CLI
+validates mode and mood names explicitly, so a new mode or mood requires updating
+the CLI validation, help text, assets, README, and deterministic checks.
 
 ## Verification and handoff
 

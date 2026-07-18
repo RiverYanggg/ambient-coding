@@ -10,26 +10,26 @@ the Ghostty Ambient project.
 
 ## Workflow
 
-1. Read the repository `README.md), `AGENTS.md), and the core CLI.
+1. Read the repository `README.md`, `AGENTS.md`, and the core CLI.
 2. Inspect the host:
    - macOS version and architecture;
    - Ghostty installation and version;
-   - `jq), `curl), `bash), and `zsh);
-   - existing `~/.config/ghostty/config), `~/.zshrc), and image directory.
+   - `jq`, `curl`, `bash`, and `zsh`;
+   - existing `~/.config/ghostty/config`, `~/.zshrc`, and image directory.
 3. Show or preserve a diff before modifying existing user configuration.
 4. Choose the smallest mode implementation that satisfies the request:
-   - `time): map local time ranges to directories;
-   - `weather): use Open-Meteo for non-commercial personal use, or the user's own provider and API key;
-   - `random): choose from the local image pool with immediate-repeat avoidance;
-   - `mood): map a user label to a local mood directory;
+   - `time`: map local time ranges to directories;
+   - `weather`: use Open-Meteo for non-commercial personal use, or the user's own provider and API key;
+   - `random`: choose from the local image pool with immediate-repeat avoidance;
+   - `mood`: map a user label to a local mood directory;
    - a new mode: add an explicit selector and document its inputs.
 5. Use `scripts/install-ambient.sh` for installation unless the user explicitly requests
    the complete terminal workspace.
 6. Keep secrets out of Git. API keys belong in the user's shell environment, macOS
    Keychain, or another user-managed secret store.
 7. Add or copy images into the appropriate category and preserve source/license
-   information in `SOURCES.md).
-8. Verify with shell syntax checks, `ghostty +validate-config), and one deterministic
+   information in `SOURCES.md`.
+8. Verify with shell syntax checks, `ghostty +validate-config`, and one deterministic
    command per configured mode.
 
 ## Mode Selection
@@ -72,8 +72,8 @@ For a new mood such as `deep-work`:
 
 1. Add `backgrounds/deep-work/` with one or more local images.
 2. Add `deep-work` to the CLI validation and help text.
-3. Update README and `SOURCES.md).
-4. Run the mode with `--no-reload), then with reload enabled.
+3. Update README and `SOURCES.md`.
+4. Run the mode with `--no-reload`, then with reload enabled.
 
 For a new time rule:
 
@@ -88,6 +88,10 @@ For an external image library, set:
 export GHOSTTY_BACKGROUND_DIR="$HOME/Pictures/ghostty-backgrounds"
 ```
 
+Adding a directory alone does not register a new mode. The CLI currently uses
+explicit validation lists, so a new mood or mode must also update the CLI,
+`--help`/`--list` output, README, source attribution, and deterministic checks.
+
 ## Safety
 
 - Never overwrite unrelated dotfiles or run full bootstrap implicitly.
@@ -95,3 +99,4 @@ export GHOSTTY_BACKGROUND_DIR="$HOME/Pictures/ghostty-backgrounds"
 - Do not delete user images.
 - Explain when Accessibility permission is needed for simulated reload.
 - Report anything that could not be verified.
+- Ghostty Ambient supports macOS only. Stop before changing files on another OS.
