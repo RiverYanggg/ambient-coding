@@ -23,7 +23,7 @@ Fish、Oh My Fish 和 `fzf-tab` 不属于当前方案，也没有放入本仓库
 ## 快速开始
 
 ```bash
-git clone https://github.com/<your-user>/mac-terminal-workspace.git
+git clone https://github.com/RiverYanggg/mac-terminal-workspace.git
 cd mac-terminal-workspace
 bash scripts/bootstrap.sh
 ```
@@ -46,4 +46,3 @@ chezmoi --source "$PWD/chezmoi" diff
 ## 安全边界
 
 仓库不保存密码、token、SSH 私钥、命令历史、机器序列号或绝对的个人工具路径。`conda`、`nvm` 和 OpenClaw 等可选环境只在本机路径存在时加载。
-
