@@ -3,21 +3,27 @@
 ## Project identity
 
 This repository is the unified `ambient-coding` project: a macOS terminal
-workspace built around Ghostty, zsh, chezmoi, and Ghostty Ambient.
+workspace designed to keep coding focused, efficient, and comfortable. It is
+built around Ghostty, zsh, chezmoi, and Ghostty Ambient.
 
-Ghostty Ambient is the primary product layer. The repository also contains the
-complete terminal toolkit and migration configuration. Ghostty currently supports
-macOS only; do not provide Linux or Windows installation paths.
+The practical terminal workflow and the Ambient experience are equally supported:
+tools, shortcuts, navigation, Git, search, reproducible configuration, and
+low-distraction backgrounds all belong to the same product. Prioritize a reliable
+coding workflow and readability; Ambient is an enhancement and must never make
+the terminal harder to use. Ghostty currently supports macOS only; do not provide
+Linux or Windows installation paths.
 
 ## Choose the scope first
 
 Classify the user's request before changing files:
 
-- Ambient-only: install or customize backgrounds, modes, weather, or moods. Use
-  `scripts/install-ambient.sh` and preserve the user's existing shell setup.
 - Complete workspace: install or modify Ghostty, zsh, Oh My Zsh, Yazi, lazygit,
   ripgrep, jq, fzf, lsd, uv, tldr, fastfetch, fonts, and chezmoi. Use
   `scripts/bootstrap.sh` only when explicitly requested.
+- Ambient-only: install or customize backgrounds, modes, weather, or moods. Use
+  `scripts/install-ambient.sh` and preserve the user's existing shell setup.
+- Combined workflow: configure both the practical terminal tools and Ambient when
+  the user wants a complete focused-coding environment.
 - Documentation or agent request: update the relevant README, docs, AGENTS, or
   Skill without applying user configuration unless requested.
 
@@ -68,7 +74,9 @@ Ghostty workspace are macOS-only.
 
 The Ambient installer must only change the Ghostty background path, install the
 Ambient CLI/assets, and add its marked idempotent zsh hook. The complete bootstrap
-may apply the full `chezmoi/` source after showing the diff.
+may apply the full `chezmoi/` source after showing the diff. In either path,
+preserve terminal readability and do not let background changes override practical
+tool or shortcut configuration.
 
 ## Terminal workspace contract
 
@@ -86,6 +94,10 @@ them:
 - Optional conda, nvm, and OpenClaw integrations must remain existence-checked.
 
 ## Ambient mode contract
+
+Ambient is optional but first-class. It should complement, never compete with, the
+coding workflow: use low-opacity, low-distraction images, keep text readable, and
+avoid adding network or permission requirements when a local rule is sufficient.
 
 The core CLI is:
 

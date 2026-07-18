@@ -2,9 +2,9 @@
 
 # Ghostty Ambient
 
-### 一个完整、可迁移、会随环境变化的 macOS 终端工作区
+### 一个让你专注编码、提高效率和体验的 macOS 终端工作区
 
-基于 [Ghostty](https://ghostty.org/)、zsh 和 chezmoi 的终端配置，包含高效命令行工具、快捷操作，以及根据时间、天气、随机策略和心情自动切换背景的 Ghostty Ambient。
+基于 [Ghostty](https://ghostty.org/)、zsh 和 chezmoi 的可迁移终端配置：把常用工具、快捷操作和稳定工作流放在一起，再用 Ghostty Ambient 为长时间编码提供低干扰的视觉氛围。
 
 <p>
   <a href="https://github.com/RiverYanggg/ambient-coding">GitHub</a> ·
@@ -23,7 +23,7 @@
   <img src="docs/images/showcase/showcase_3.png" alt="Ghostty Ambient snow background" width="32%" />
 </p>
 
-## What you get
+## Built for focused coding
 
 | Layer | Included |
 | --- | --- |
@@ -32,21 +32,10 @@
 | Navigation | Yazi 文件管理器，退出后自动回到最后访问目录 |
 | Git and search | lazygit、ripgrep、fzf、jq、lsd |
 | Python and system | uv、tldr、fastfetch |
-| Ambient | 时间、天气、心情、随机背景模式，支持本地图片库和持久化默认模式 |
 | Reproducibility | Homebrew + chezmoi，配置使用 `$HOME` 和模板，不绑定个人绝对路径 |
+| Ambient enhancement | 时间、天气、心情、随机背景模式，为专注工作增加低干扰氛围 |
 
-## Ambient background system
-
-Ghostty Ambient 是这个工作区的动态背景层。它只更新 Ghostty 的背景图片，不修改终端输出，也不运行常驻 GUI。
-
-| 模式 | 示例 | 行为 |
-| --- | --- | --- |
-| Time | `--mode time` | 按上午、下午、晚上选择背景 |
-| Weather | `--mode weather --weather auto` | 通过 Open-Meteo 映射晴、阴、雨、雪、雷暴 |
-| Mood | `--mode mood --mood focus` | 按 `calm`、`focus`、`energy`、`tired`、`happy` 选择 |
-| Random | `--mode random` | 从全部本地素材随机选择，避免连续重复 |
-
-背景选择器位于 [`executable_ghostty-time-background`](chezmoi/dot_local/bin/executable_ghostty-time-background)，Ghostty 配置通过 [`config.tmpl`](chezmoi/dot_config/ghostty/config.tmpl) 使用 `current.jpg`，zsh 在 Ghostty shell 启动时自动触发选择。
+核心原则：工具和快捷操作首先服务于编码效率；背景设置是锦上添花，必须保持文字可读、低干扰，并且可以独立关闭或不安装。
 
 ## Quick start
 
@@ -89,7 +78,22 @@ Ambient 安装器只安装 CLI 和背景图片，只更新 Ghostty 的 `backgrou
 bash scripts/install-ambient.sh --no-deps
 ```
 
-## Try Ambient
+## Daily coding workflow
+
+安装完成后，项目的重点是减少编码过程中的上下文切换：
+
+```text
+y                 浏览项目、预览文件并保持退出后的目录
+lazygit           查看变更、暂存、提交和处理分支
+rg "pattern" .    快速定位代码和配置
+fzf               交互式筛选文件或命令
+uv run ...        管理 Python 环境和工具
+fastfetch         快速确认当前终端环境
+```
+
+Ghostty 的分屏、tab、quick terminal、字体缩放和配置重载快捷键见 [`docs/KEYBINDS.md`](docs/KEYBINDS.md)。
+
+## Optional: tune Ambient
 
 所有测试命令都可以加 `--no-reload`，只验证图片选择而不请求 Ghostty 重载：
 
@@ -119,7 +123,7 @@ ghostty-time-background --set-mode time
 
 当前窗口没有刷新时，按 `Cmd + Shift + ,` 重载 Ghostty。自动重载需要 macOS“隐私与安全性 -> 辅助功能”权限；没有权限时使用快捷键即可。
 
-## Terminal workflow
+## Command-line reference
 
 ```text
 y                 Yazi 文件管理器
@@ -132,6 +136,19 @@ fastfetch         查看系统信息
 ```
 
 常用快捷键和工具操作见 [`docs/KEYBINDS.md`](docs/KEYBINDS.md)。完整配置、字体、shell、chezmoi 和迁移说明见 [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) 与 [`docs/CHEZMOI.md`](docs/CHEZMOI.md)。
+
+## Ambient background system
+
+Ghostty Ambient 是工作区的体验增强层。它只更新 Ghostty 的背景图片，不修改终端输出，也不运行常驻 GUI；不使用它不会影响任何编码工具和快捷功能。
+
+| 模式 | 示例 | 行为 |
+| --- | --- | --- |
+| Time | `--mode time` | 按上午、下午、晚上选择背景 |
+| Weather | `--mode weather --weather auto` | 通过 Open-Meteo 映射晴、阴、雨、雪、雷暴 |
+| Mood | `--mode mood --mood focus` | 按 `calm`、`focus`、`energy`、`tired`、`happy` 选择 |
+| Random | `--mode random` | 从全部本地素材随机选择，避免连续重复 |
+
+背景选择器位于 [`executable_ghostty-time-background`](chezmoi/dot_local/bin/executable_ghostty-time-background)，Ghostty 配置通过 [`config.tmpl`](chezmoi/dot_config/ghostty/config.tmpl) 使用 `current.jpg`，zsh 在 Ghostty shell 启动时自动触发选择。
 
 ## Weather and privacy
 
