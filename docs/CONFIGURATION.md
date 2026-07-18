@@ -27,6 +27,23 @@ Ghostty 使用：
 - 25 MB scrollback
 - `window-save-state = never`，避免恢复旧 Fish 启动状态
 
+#### Time-based background preview
+
+The managed setup includes `ghostty-time-background`. It selects one of three
+images from the local time and updates `backgrounds/current.jpg`:
+
+```bash
+ghostty-time-background --time 09:00
+ghostty-time-background --time 13:00
+ghostty-time-background --time 19:00
+```
+
+The zsh startup hook applies the current slot for Ghostty shells. The command
+tries to reload an already-open window automatically; if macOS blocks the
+simulated shortcut, use `Cmd+Shift+,` manually or grant Accessibility access
+to the terminal app running the script. Add `--no-reload` when only testing
+which image is selected.
+
 背景图片在 `~/.config/ghostty/backgrounds/`。Ghostty 支持 PNG 和 JPEG；建议使用 1920px 左右宽度、压缩后的图片，避免每个终端实例占用过多显存。
 
 ### Maple Mono NF CN
@@ -170,4 +187,3 @@ chezmoi update
 - 让所有 shell 命令都经过 LaTeX/公式渲染的 wrapper
 
 不再使用的配置不应重新加入迁移仓库。
-
