@@ -27,22 +27,36 @@ Ghostty 使用：
 - 25 MB scrollback
 - `window-save-state = never`，避免恢复旧 Fish 启动状态
 
-#### Time-based background preview
+#### Ambient background modes
 
-The managed setup includes `ghostty-time-background`. It selects one of three
-images from the local time and updates `backgrounds/current.jpg`:
+The managed setup includes `ghostty-time-background`. It selects a local image
+and updates `backgrounds/current.jpg`:
 
 ```bash
-ghostty-time-background --time 09:00
-ghostty-time-background --time 13:00
-ghostty-time-background --time 19:00
+ghostty-time-background --mode time --time 09:00
+ghostty-time-background --mode weather --weather rain
+ghostty-time-background --mode weather --weather auto
+ghostty-time-background --mode mood --mood focus
+ghostty-time-background --mode random
+
+# Persist a default mode for newly opened Ghostty shells.
+ghostty-time-background --set-mode weather --weather auto
+ghostty-time-background --set-mode mood --mood calm
+ghostty-time-background --set-mode random
+ghostty-time-background --set-mode time
 ```
 
-The zsh startup hook applies the current slot for Ghostty shells. The command
-tries to reload an already-open window automatically; if macOS blocks the
-simulated shortcut, use `Cmd+Shift+,` manually or grant Accessibility access
-to the terminal app running the script. Add `--no-reload` when only testing
-which image is selected.
+Available time slots are morning, afternoon, and evening. Weather mode maps
+Open-Meteo weather codes to clear, cloudy, rain, snow, and storm; set
+`GHOSTTY_LATITUDE` and `GHOSTTY_LONGITUDE` to avoid IP-based geolocation.
+Mood mode supports calm, focus, energy, tired, and happy. Random mode avoids
+selecting the same image twice in a row.
+
+The zsh startup hook applies time mode for Ghostty shells. Each command tries
+to reload an already-open window automatically; if macOS blocks the simulated
+shortcut, use `Cmd+Shift+,` manually or grant Accessibility access to the
+terminal app running the script. Add `--no-reload` when only testing image
+selection.
 
 背景图片在 `~/.config/ghostty/backgrounds/`。Ghostty 支持 PNG 和 JPEG；建议使用 1920px 左右宽度、压缩后的图片，避免每个终端实例占用过多显存。
 

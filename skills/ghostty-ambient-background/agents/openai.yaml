@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ghostty Ambient Background"
+  short_description: "Configure context-aware Ghostty backgrounds"
+  default_prompt: "Use $ghostty-ambient-background to configure a Ghostty background mode from the user’s context and preferences."

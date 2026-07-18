@@ -3,23 +3,42 @@ set -euo pipefail
 
 background_dir="${GHOSTTY_BACKGROUND_DIR:-$HOME/.config/ghostty/backgrounds}"
 current_image="$background_dir/current.jpg"
-state_file="${XDG_CACHE_HOME:-$HOME/.cache}/ghostty-time-background/slot"
+state_dir="${XDG_CACHE_HOME:-$HOME/.cache}/ghostty-time-background"
+last_selection="$state_dir/last-selection"
+preference_dir="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty-time-background"
+saved_mode="$preference_dir/mode"
+saved_weather="$preference_dir/weather"
+saved_mood="$preference_dir/mood"
 reload=true
 quiet=false
+mode=""
+persist_mode=false
 requested_time=""
+requested_weather=""
+requested_mood=""
 
 usage() {
     cat <<'EOF'
 Usage: ghostty-time-background [options]
 
-Select and apply a Ghostty background based on the local time.
+Select and apply a Ghostty background.
+
+Modes:
+  time                  Select morning, afternoon, or evening by local time
+  weather               Select by weather; auto queries Open-Meteo
+  random                Select a random image from the full image pool
+  mood                  Select by calm, focus, energy, tired, or happy
 
 Options:
-  --time HH:MM  Simulate a local time for verification
-  --no-reload   Update the image without asking Ghostty to reload
-  --quiet       Suppress normal output
-  --show        Print the selected time slot and image
-  -h, --help    Show this help
+  --mode MODE           time, weather, random, or mood
+  --set-mode MODE       Persist the mode for new Ghostty shells
+  --time HH:MM          Simulate local time for testing time mode
+  --weather WEATHER     auto, clear, cloudy, rain, snow, or storm
+  --mood MOOD           calm, focus, energy, tired, or happy
+  --no-reload           Update the image without asking Ghostty to reload
+  --quiet               Suppress normal output
+  --list                List available modes and moods
+  -h, --help            Show this help
 EOF
 }
 
@@ -31,9 +50,30 @@ log() {
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --mode)
+            [[ $# -ge 2 ]] || { printf 'missing value for --mode\n' >&2; exit 2; }
+            mode="$2"
+            shift 2
+            ;;
+        --set-mode)
+            [[ $# -ge 2 ]] || { printf 'missing value for --set-mode\n' >&2; exit 2; }
+            mode="$2"
+            persist_mode=true
+            shift 2
+            ;;
         --time)
             [[ $# -ge 2 ]] || { printf 'missing value for --time\n' >&2; exit 2; }
             requested_time="$2"
+            shift 2
+            ;;
+        --weather)
+            [[ $# -ge 2 ]] || { printf 'missing value for --weather\n' >&2; exit 2; }
+            requested_weather="$2"
+            shift 2
+            ;;
+        --mood)
+            [[ $# -ge 2 ]] || { printf 'missing value for --mood\n' >&2; exit 2; }
+            requested_mood="$2"
             shift 2
             ;;
         --no-reload)
@@ -44,9 +84,9 @@ while [[ $# -gt 0 ]]; do
             quiet=true
             shift
             ;;
-        --show)
-            quiet=false
-            shift
+        --list)
+            printf '%s\n' 'modes: time, weather, random, mood' 'moods: calm, focus, energy, tired, happy' 'weather: auto, clear, cloudy, rain, snow, storm'
+            exit 0
             ;;
         -h|--help)
             usage
@@ -60,50 +100,147 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -n "$requested_time" ]]; then
-    if [[ ! "$requested_time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
-        printf 'invalid time: %s (expected HH:MM)\n' "$requested_time" >&2
-        exit 2
+if [[ -z "$mode" ]]; then
+    mode="$(cat "$saved_mode" 2>/dev/null || true)"
+    [[ -n "$mode" ]] || mode="time"
+fi
+
+case "$mode" in
+    time|weather|random|mood) ;;
+    *) printf 'invalid mode: %s\n' "$mode" >&2; exit 2 ;;
+esac
+
+if [[ "$persist_mode" == true ]]; then
+    printf '%s\n' "$mode" > "$saved_mode"
+fi
+
+mkdir -p "$background_dir" "$state_dir" "$(dirname "$saved_mood")"
+if [[ -n "$requested_weather" ]]; then
+    printf '%s\n' "$requested_weather" > "$saved_weather"
+fi
+
+select_time_slot() {
+    local now hour
+    if [[ -n "$requested_time" ]]; then
+        [[ "$requested_time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]] || { printf 'invalid time: %s\n' "$requested_time" >&2; exit 2; }
+        now="$requested_time"
+    else
+        now="$(date +%H:%M)"
     fi
-    now="$requested_time"
+    hour=$((10#${now%%:*}))
+    if (( hour < 12 )); then
+        selection_key="morning"
+    elif (( hour < 18 )); then
+        selection_key="afternoon"
+    else
+        selection_key="evening"
+    fi
+    selection_reason="$selection_key ($now)"
+}
+
+weather_from_code() {
+    local code="$1"
+    if (( code == 0 || code == 1 )); then
+        printf 'clear'
+    elif (( code == 2 || code == 3 || code == 45 || code == 48 )); then
+        printf 'cloudy'
+    elif (( code >= 51 && code <= 67 || code >= 80 && code <= 82 )); then
+        printf 'rain'
+    elif (( code >= 71 && code <= 77 || code >= 85 && code <= 86 )); then
+        printf 'snow'
+    elif (( code >= 95 && code <= 99 )); then
+        printf 'storm'
+    else
+        printf 'cloudy'
+    fi
+}
+
+select_weather() {
+    local weather="$requested_weather" lat="" lon="" code="" response=""
+    if [[ -z "$weather" ]]; then
+        weather="$(cat "$saved_weather" 2>/dev/null || true)"
+    fi
+    if [[ -z "$weather" || "$weather" == "auto" ]]; then
+        weather=""
+        if [[ -n "${GHOSTTY_LATITUDE:-}" && -n "${GHOSTTY_LONGITUDE:-}" ]]; then
+            lat="$GHOSTTY_LATITUDE"
+            lon="$GHOSTTY_LONGITUDE"
+        elif command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+            response="$(curl -fsSL --max-time 8 https://ipapi.co/json/ 2>/dev/null || true)"
+            lat="$(printf '%s' "$response" | jq -r '.latitude // empty')"
+            lon="$(printf '%s' "$response" | jq -r '.longitude // empty')"
+        fi
+        if [[ -n "$lat" && -n "$lon" ]]; then
+            response="$(curl -fsSL --max-time 8 "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=weather_code&timezone=auto" 2>/dev/null || true)"
+            code="$(printf '%s' "$response" | jq -r '.current.weather_code // empty')"
+            [[ "$code" =~ ^[0-9]+$ ]] && weather="$(weather_from_code "$code")"
+        fi
+        [[ -n "$weather" ]] || weather="cloudy"
+    fi
+    case "$weather" in
+        clear|cloudy|rain|snow|storm) selection_key="$weather" ;;
+        *) printf 'invalid weather: %s\n' "$weather" >&2; exit 2 ;;
+    esac
+    selection_reason="weather: $selection_key"
+}
+
+select_mood() {
+    local mood="$requested_mood"
+    if [[ -z "$mood" ]]; then
+        mood="$(cat "$saved_mood" 2>/dev/null || true)"
+    fi
+    [[ -n "$mood" ]] || mood="focus"
+    case "$mood" in
+        calm|focus|energy|tired|happy) selection_key="$mood" ;;
+        *) printf 'invalid mood: %s\n' "$mood" >&2; exit 2 ;;
+    esac
+    printf '%s\n' "$mood" > "$saved_mood"
+    selection_reason="mood: $mood"
+}
+
+case "$mode" in
+    time) select_time_slot ;;
+    weather) select_weather ;;
+    mood) select_mood ;;
+    random) selection_key="all"; selection_reason="random" ;;
+esac
+
+if [[ "$mode" == "random" ]]; then
+    search_dir="$background_dir"
 else
-    now="$(date +%H:%M)"
+    search_dir="$background_dir/$selection_key"
 fi
 
-hour="${now%%:*}"
-hour=$((10#$hour))
+candidates=()
+while IFS= read -r image; do
+    [[ "$image" == "$current_image" ]] || candidates+=("$image")
+done < <(find "$search_dir" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print 2>/dev/null | sort)
 
-if (( hour < 12 )); then
-    slot="morning"
-    image_name="dark-forest.jpg"
-elif (( hour < 18 )); then
-    slot="afternoon"
-    image_name="night-city.jpg"
-else
-    slot="evening"
-    image_name="night-mountains.jpg"
+if [[ ${#candidates[@]} -eq 0 && "$mode" != "random" ]]; then
+    printf 'no images found for %s in %s\n' "$selection_key" "$search_dir" >&2
+    exit 1
 fi
-
-source_image="$background_dir/$image_name"
-if [[ ! -f "$source_image" ]]; then
-    printf 'background image not found: %s\n' "$source_image" >&2
+if [[ ${#candidates[@]} -eq 0 ]]; then
+    printf 'no background images found in %s\n' "$search_dir" >&2
     exit 1
 fi
 
-mkdir -p "$background_dir" "$(dirname "$state_file")"
-if [[ ! -f "$current_image" ]] || ! cmp -s "$source_image" "$current_image"; then
-    cp "$source_image" "$current_image"
+if [[ ${#candidates[@]} -gt 1 && -f "$last_selection" ]]; then
+    previous="$(cat "$last_selection")"
+    filtered=()
+    for image in "${candidates[@]}"; do
+        [[ "$image" != "$previous" ]] && filtered+=("$image")
+    done
+    [[ ${#filtered[@]} -gt 0 ]] && candidates=("${filtered[@]}")
 fi
-printf '%s\n' "$slot" > "$state_file"
+source_image="${candidates[$((RANDOM % ${#candidates[@]}))]}"
+cp "$source_image" "$current_image"
+printf '%s\n' "$source_image" > "$last_selection"
 
-log "Ghostty background: $slot ($now) -> $image_name"
+log "Ghostty background: $selection_reason -> $(basename "$source_image")"
 
-if [[ "$reload" == true ]]; then
-    if command -v osascript >/dev/null 2>&1; then
-        if ! osascript \
-            -e 'tell application "System Events" to tell process "Ghostty" to keystroke "," using {command down, shift down}' \
-            >/dev/null 2>&1; then
-            log "Ghostty reload was not triggered; press Cmd+Shift+, manually."
-        fi
+if [[ "$reload" == true ]] && command -v osascript >/dev/null 2>&1; then
+    if ! osascript -e 'tell application "System Events" to tell process "Ghostty" to keystroke "," using {command down, shift down}' >/dev/null 2>&1; then
+        log "Ghostty reload was not triggered; press Cmd+Shift+, manually."
     fi
 fi

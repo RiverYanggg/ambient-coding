@@ -1,44 +1,111 @@
 # AGENTS.md
 
-你正在配置一台 macOS 开发机的终端环境。请遵循本文件和 `docs/` 中的说明，先检查现状，再执行变更。
+## Project scope
 
-## 目标状态
+This repository packages Ghostty Ambient, a macOS-first tool that selects a local
+Ghostty background from time, weather, random, or mood context.
 
-- 默认 shell 为 `/bin/zsh`。
-- Ghostty 启动 `/bin/zsh -l`。
-- Oh My Zsh 使用 `clean` 主题。
-- 只启用 `zsh-autosuggestions`；Tab 有建议时接受建议，否则执行普通补全。
-- 使用 Yazi shell wrapper，使退出 Yazi 后回到最后访问的目录。
-- 使用 lsd aliases、jq helpers 和仅对当前 `rg` 函数生效的 ripgrep 配置。
-- 使用 chezmoi 管理 home 配置和 Ghostty 背景图。
-- 不安装或配置 Fish、Oh My Fish、`fzf-tab`。
+When a user asks to configure or extend the project, treat the Ambient feature as
+the primary scope. The full terminal workspace in `scripts/bootstrap.sh` is
+optional and must not be installed unless the user explicitly asks for it.
 
-## 执行顺序
+## Required reading
 
-1. 阅读 `README.md`、`docs/CONFIGURATION.md` 和 `docs/CHEZMOI.md`。
-2. 检查 `uname -s`, `uname -m`, `$SHELL`, `command -v brew`, `chezmoi status`。
-3. 运行 `bash scripts/bootstrap.sh`，必要时逐步执行脚本中的命令。
-4. 应用配置前运行 `chezmoi --source "$PWD/chezmoi" diff`，不要静默覆盖用户文件。
-5. 应用后运行：
+Before changing anything, read:
 
-   ```bash
-   zsh -n ~/.zshrc
-   /Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config
-   chezmoi status
-   ```
+1. `README.md`
+2. `docs/CONFIGURATION.md`
+3. `chezmoi/dot_local/bin/executable_ghostty-time-background`
+4. `skills/ghostty-ambient-background/SKILL.md` when the request concerns user-defined modes or agent automation.
 
-6. 若默认 shell 不正确，使用 `chsh -s /bin/zsh`，然后重新打开终端。
+## Environment prerequisites
 
-## 迁移规则
+The supported runtime is macOS with:
 
-- 所有路径使用 `$HOME`、`$(brew --prefix)` 或 chezmoi 模板，不要硬编码 `/Users/<name>`。
-- 不把 `~/.zsh_history`、密钥、token、私有仓库地址和机器特有环境变量加入仓库。
-- `RIPGREP_CONFIG_PATH` 不应全局导出。配置通过 zsh `rg` 函数局部注入，避免改变 Codex 或其他程序调用 rg 的行为。
-- 不恢复已经删除的 Fish、Oh My Fish 或 `fzf-tab`。
-- 如果当前用户有额外的 conda、nvm 或 OpenClaw 安装，只能通过存在性检查可选加载。
-- 编辑文件使用补丁或编辑器；修改后先检查 diff，再应用。
+- Ghostty 1.2.0 or newer, installed as `/Applications/Ghostty.app`;
+- Bash, zsh, curl;
+- jq for automatic weather mode;
+- Homebrew is recommended but not mandatory if dependencies are already installed.
 
-## 交付标准
+Open-Meteo's public endpoint does not require an API key for non-commercial
+personal use. If a user chooses a paid or commercial weather provider, the user
+must supply the account and API key. Never invent, commit, print, or store a
+secret in the repository.
 
-配置完成必须给出：实际修改的文件、执行过的验证命令、未能验证的部分，以及重新打开 Ghostty 所需的操作。不要声称没有运行过的测试已经通过。
+## Safe automation workflow
 
+1. Inspect `uname -s`, Ghostty availability, `command -v jq`,
+   `command -v curl`, current Ghostty config, and `git status`.
+2. Back up or show a diff for existing user configuration before applying changes.
+3. Prefer `bash scripts/install-ambient.sh` for a normal installation. Use
+   `--no-deps` when dependencies are managed separately.
+4. Do not run the full `scripts/bootstrap.sh` unless the user requests the
+   complete macOS terminal workspace.
+5. Keep user configuration changes narrow:
+   - replace only the `background-image` entry in Ghostty config;
+   - add the marked idempotent hook to `~/.zshrc`;
+   - install the CLI under `~/.local/bin`;
+   - copy assets under `~/.config/ghostty/backgrounds/`.
+6. For existing chezmoi-managed machines, run
+   `chezmoi --source "$PWD/chezmoi" diff` before `apply`. Do not use
+   `chezmoi apply --force` or overwrite unrelated dotfiles.
+7. If macOS blocks automatic Ghostty reload, explain the Accessibility permission
+   and keep the manual `Cmd+Shift+,` fallback.
+
+## Mode configuration rules
+
+The CLI is:
+
+```text
+chezmoi/dot_local/bin/executable_ghostty-time-background
+```
+
+Keep the existing mode contract stable:
+
+- `time`: morning, afternoon, evening;
+- `weather`: auto, clear, cloudy, rain, snow, storm;
+- `random`: all local image directories, without immediate repetition;
+- `mood`: calm, focus, energy, tired, happy, plus documented user additions.
+
+For a new mode or mood:
+
+1. Add or update the validation list.
+2. Add the matching asset directory under
+   `chezmoi/dot_config/ghostty/backgrounds/`.
+3. Update the CLI help and README.
+4. Add a deterministic manual test command.
+5. Run `bash -n` on the CLI and `zsh -n` on any shell template.
+6. Validate Ghostty with `ghostty +validate-config` or the full app path.
+
+## User customization
+
+User-provided images should be copied, not silently deleted or replaced. Preserve
+the `SOURCES.md` attribution record for downloaded assets. Use
+`GHOSTTY_BACKGROUND_DIR` for an external library and
+`GHOSTTY_LATITUDE`/`GHOSTTY_LONGITUDE` to avoid IP geolocation.
+
+When the user describes a new context such as "deep work on rainy mornings":
+
+- map it to existing tags if possible;
+- otherwise create a small, explicit mode or mood directory;
+- do not add an API dependency when a local rule is sufficient;
+- explain any new permission, network, or API-key requirement.
+
+## Verification and handoff
+
+Before declaring completion, verify:
+
+```bash
+bash -n chezmoi/dot_local/bin/executable_ghostty-time-background
+bash -n scripts/install-ambient.sh
+zsh -n chezmoi/dot_zshrc.tmpl
+ghostty-time-background --list
+ghostty-time-background --mode time --time 09:00 --no-reload
+ghostty-time-background --mode weather --weather rain --no-reload
+ghostty-time-background --mode mood --mood focus --no-reload
+ghostty-time-background --mode random --no-reload
+/Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config
+```
+
+Report actual modified files, commands run, failed or unverified checks, and
+whether the user needs to restart Ghostty or grant Accessibility access.
