@@ -1,0 +1,9 @@
+--smart-case
+--hidden
+--color=auto
+--heading
+--line-number
+--column
+--glob=!**/.git/**
+--glob=!**/node_modules/**
+--glob=!**/.venv/**
